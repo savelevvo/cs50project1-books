@@ -100,3 +100,4 @@ ENV/
 
 *.csv
 flask_session/
+.idea/
