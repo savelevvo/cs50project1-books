@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, redirect, url_for
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -23,29 +23,45 @@ db = scoped_session(sessionmaker(bind=engine))
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', email=session.get('email'))
+
 
 @app.route("/reg_form")
 def reg_form():
     return render_template('register.html')
 
+
+@app.route("/login_form")
+def login_form():
+    return render_template('login.html')
+
+
 @app.route('/register', methods=['POST'])
 def register():
-	email = request.form.get('email')
-	password = request.form.get('password')
+    email = request.form.get('email')
+    password = request.form.get('password')
 
-	db.execute("INSERT INTO users (email, password) VALUES ('{}', '{}')".format(email, password))
-	db.commit()
-	return render_template('index.html')
+    db.execute("INSERT INTO users (email, password) VALUES ('{}', '{}')".format(email, password))
+    db.commit()
+
+    return render_template('index.html')
+
 
 @app.route('/login', methods=['POST'])
 def login():
-	pass
+    if request.method == 'POST':
+        session['email'] = request.form['email']
+        return redirect(url_for('index'))
 
-@app.route('/logout', methods=['POST'])
+    return '''
+            <form method="post">
+                <p><input type=text name=username>
+                <p><input type=submit value=Login>
+            </form>
+        '''
+
+
+@app.route('/logout')
 def logout():
-	pass
-
-
-
-
+    session.pop('username', None)
+    return redirect(url_for('index'))
