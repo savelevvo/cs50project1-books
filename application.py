@@ -1,29 +1,44 @@
 import os
-
-from flask import Flask, session, render_template, request, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from flask import Flask, session, render_template, request, redirect, url_for
 
-app = Flask(__name__)
 
-# Check for environment variable
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
 
-# Configure session to use filesystem
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+db = SQLAlchemy(app)
 
-# Set up database
-engine = create_engine(os.getenv("DATABASE_URL"))
-db = scoped_session(sessionmaker(bind=engine))
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(), unique=True, nullable=False)
+    password = db.Column(db.String(), nullable=False)
+
+    def __init__(self, email, password, **kwargs):
+        super(User, self).__init__(**kwargs)
+        self.email = email
+        self.password = self.set_password(password)
+
+    def __repr__(self):
+        return self.email
+
+    def set_password(self, password):
+        return generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
 @app.route("/")
 def index():
-    return render_template('index.html', email=session.get('email'))
+    return render_template('index.html', email=session.get('email'), is_logged=session.get('is_logged'))
 
 
 @app.route("/reg_form")
@@ -41,8 +56,8 @@ def register():
     email = request.form.get('email')
     password = request.form.get('password')
 
-    db.execute("INSERT INTO users (email, password) VALUES ('{}', '{}')".format(email, password))
-    db.commit()
+    db.session.add(User(email=email, password=password))
+    db.session.commit()
 
     return render_template('index.html')
 
@@ -50,18 +65,18 @@ def register():
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
-        session['email'] = request.form['email']
-        return redirect(url_for('index'))
+        email = request.form.get('email')
+        password = request.form.get('password')
 
-    return '''
-            <form method="post">
-                <p><input type=text name=username>
-                <p><input type=submit value=Login>
-            </form>
-        '''
+        user = User.query.filter_by(email=email).first()
+        if user and user.check_password(password):
+            session['email'] = email
+            session['is_logged'] = True
+        return redirect(url_for('index'))
 
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
+    session.pop('email', None)
+    session['is_logged'] = False
     return redirect(url_for('index'))
