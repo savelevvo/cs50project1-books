@@ -1,3 +1,4 @@
+werkzeug
 Flask
 Flask-Session
 psycopg2
