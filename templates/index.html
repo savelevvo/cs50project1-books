@@ -7,11 +7,15 @@
 {% block body %}
     <h1>Main page</h1>
 
+    <div><a href="{{ url_for('search') }}">Search</a></div>
+
     {% if not is_logged %}
         <a href="{{ url_for('login_form') }}">Login</a><br>
         <a href="{{ url_for('reg_form') }}">Register</a><br>
     {% endif %}
+
     {% if is_logged %}
         <a href="{{ url_for('logout') }}">Logout</a>
     {% endif %}
+
 {% endblock %}
