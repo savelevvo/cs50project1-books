@@ -5,13 +5,53 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
     </head>
     <body>
-        <div class="container">
-            {% if email %}
-                Logged as: {{ email }}
-            {% endif %}
 
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="/">Project 1: Books</a>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+
+                {% if not is_logged %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login_form') }}">Login</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('reg_form') }}">Register</a>
+                    </li>
+                {% endif %}
+
+                {% if is_logged %}
+                    <a class="navbar-brand">
+                        Logged as: {{ email }}
+                    </a>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('search') }}">Search</a>
+                    </li>
+                {% endif %}
+
+
+            </ul>
+
+        </div>
+    </nav>
+
+
+    <main class="container" role="main">
+        <div class="starter-template">
+            <br><br><br>
             {% block body %}
             {% endblock %}
+
         </div>
+    </main>
+
     </body>
 </html>
