@@ -70,9 +70,12 @@ def search():
     if request.method == 'GET':
         isbn = request.args.get('isbn')
         title = request.args.get('title')
-        author = request.args.get('author')
 
-        result = Book.query.filter_by(isbn=isbn).all()
+        author_name = request.args.get('author')
+        authors = Author.query.filter(Author.name.like("%{}%".format(author_name))).all()
+        author_ids = [a.id for a in authors]
+
+        result = Book.query.filter(Book.author_id.in_(author_ids), Book.isbn.like("%{}%".format(isbn)), Book.title.like("%{}%".format(title))).all()
 
         return render_template('search.html', email=session.get('email'), is_logged=session.get('is_logged'), search_results=result)
 
