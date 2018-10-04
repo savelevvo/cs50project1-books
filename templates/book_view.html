@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Book view
+{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-body">
+            <h1>{{ book.title }}</h1>
+            <h3><i>by {{ book.author.name }}, {{ book.release_year }}</i></h3>
+            ISBN {{ book.isbn }}
+        </div>
+    </div>
+{% endblock %}

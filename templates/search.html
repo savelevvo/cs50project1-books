@@ -45,15 +45,16 @@
                 <tbody>
                     {% for res in search_results%}
                         <tr>
-                        <td>{{ res['isbn'] }}</td>
-                        <td>{{ res['author'].name }}</td>
-                        <td>{{ res['title'] }}</td>
+                            <td>{{ res['isbn'] }}</td>
+                            <td>{{ res['author'].name }}</td>
+                            <td><a href="{{ url_for('book_view', isbn=res['isbn']) }}">{{ res['title'] }}</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
         {% endif %}
+
+
     </div>
 
 

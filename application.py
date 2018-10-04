@@ -2,7 +2,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
-from flask import Flask, session, render_template, request, redirect, url_for
+from flask import Flask, session, render_template, request, redirect, url_for, jsonify, Response
 
 
 if not os.getenv("DATABASE_URL"):
@@ -80,9 +80,27 @@ def search():
         return render_template('search.html', email=session.get('email'), is_logged=session.get('is_logged'), search_results=result)
 
 
+@app.route("/book_view", methods=['GET'])
+def book_view():
+    isbn = request.args.get('isbn')
+    book = Book.query.filter_by(isbn=isbn).first()
+    return render_template('book_view.html', email=session.get('email'), is_logged=session.get('is_logged'), book=book)
+
+
 @app.route("/login_form")
 def login_form():
     return render_template('login.html')
+
+
+@app.route("/api/<string:isbn>", methods=['GET'])
+def show_api_book(isbn):
+    book = Book.query.filter_by(isbn=isbn).first()
+    if book:
+        result = {"title": book.title, "author": book.author.name,
+                  "year": book.release_year, "isbn": book.isbn}  # todo: add 'review_count' and 'average_score'
+        return jsonify(result)
+    else:
+        return Response(status=404)
 
 
 @app.route('/register', methods=['POST'])
