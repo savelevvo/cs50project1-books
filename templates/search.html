@@ -12,29 +12,49 @@
         <a href="{{ url_for('reg_form') }}">Register</a><br>
     {% endif %}
 
+    <div class="container">
+        <form action="{{ url_for('search') }}" method="get">
+            <div class="form-group">
+                <label for="exampleInputEmail1">ISBN</label>
+                <input type="text" class="form-control" name="isbn", id="exampleInputEmail1" placeholder="Enter ISBN">
+            </div>
 
-    <form action="{{ url_for('search') }}" method="get">
-        <div class="form-group">
-            <label for="exampleInputEmail1">ISBN</label>
-            <input type="text" class="form-control" name="isbn", id="exampleInputEmail1" placeholder="Enter ISBN">
-        </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Book title</label>
+                <input type="text" class="form-control" name="title", id="exampleInputPassword1" placeholder="Enter book title">
+            </div>
 
-        <div class="form-group">
-            <label for="exampleInputPassword1">Book title</label>
-            <input type="text" class="form-control" name="title", id="exampleInputPassword1" placeholder="Book title">
-        </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Book author</label>
+                <input type="text" class="form-control" name="author", id="exampleInputPassword1" placeholder="Enter book author">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
 
-        <div class="form-group">
-            <label for="exampleInputPassword1">Book author</label>
-            <input type="text" class="form-control" name="author", id="exampleInputPassword1" placeholder="Book author">
-        </div>
-        <button type="submit" class="btn btn-primary">Search</button>
-    </form>
+    <div class="container" style="margin-top: 2em">
+        {% if search_results %}
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="20%">ISBN</th>
+                        <th scope="col" width="40%">Author</th>
+                        <th scope="col">Title</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in search_results%}
+                        <tr>
+                        <td>{{ res['isbn'] }}</td>
+                        <td>{{ res['author'].name }}</td>
+                        <td>{{ res['title'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-    {% if search_results %}
-        {{ search_results }}
-    {% endif %}
-
+        {% endif %}
+    </div>
 
 
 {% endblock %}
