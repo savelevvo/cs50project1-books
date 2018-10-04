@@ -1,4 +1,5 @@
 import os
+import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
@@ -84,7 +85,15 @@ def search():
 def book_view():
     isbn = request.args.get('isbn')
     book = Book.query.filter_by(isbn=isbn).first()
-    return render_template('book_view.html', email=session.get('email'), is_logged=session.get('is_logged'), book=book)
+
+    key = os.getenv("GOODREADS_KEY")
+    _request = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": key, "isbns": isbn}).json()
+    avg_rating = _request['books'][0]['average_rating'] or 'N/a'
+    rating_cnt = _request['books'][0]['ratings_count'] or 'N/a'
+
+    data = {'book': book, 'avg_rating': avg_rating, 'rating_cnt': rating_cnt}
+
+    return render_template('book_view.html', email=session.get('email'), is_logged=session.get('is_logged'), data=data)
 
 
 @app.route("/login_form")
@@ -96,8 +105,14 @@ def login_form():
 def show_api_book(isbn):
     book = Book.query.filter_by(isbn=isbn).first()
     if book:
-        result = {"title": book.title, "author": book.author.name,
-                  "year": book.release_year, "isbn": book.isbn}  # todo: add 'review_count' and 'average_score'
+        key = os.getenv("GOODREADS_KEY")
+        _request = requests.get("https://www.goodreads.com/book/review_counts.json",
+                                params={"key": key, "isbns": isbn}).json()
+        avg_rating = _request['books'][0]['average_rating'] or 'N/a'
+        rating_cnt = _request['books'][0]['ratings_count'] or 'N/a'
+
+        result = {"title": book.title, "author": book.author.name, "year": book.release_year,
+                  "isbn": book.isbn, "review_count": rating_cnt, "average_score": avg_rating}
         return jsonify(result)
     else:
         return Response(status=404)

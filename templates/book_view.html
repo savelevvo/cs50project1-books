@@ -7,9 +7,12 @@
 {% block body %}
     <div class="card">
         <div class="card-body">
-            <h1>{{ book.title }}</h1>
-            <h3><i>by {{ book.author.name }}, {{ book.release_year }}</i></h3>
-            ISBN {{ book.isbn }}
+            <h1>{{ data['book'].title }}</h1>
+            <h3><i>by {{ data['book'].author.name }}, {{ data['book'].release_year }}</i></h3>
+            <br>
+            ISBN: {{ data['book'].isbn }}<br>
+            Average rating: {{ data['avg_rating'] }}<br>
+            Ratings count: {{ data['rating_cnt'] }}<br>
         </div>
     </div>
 {% endblock %}
